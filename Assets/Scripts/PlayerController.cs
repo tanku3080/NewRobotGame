@@ -32,6 +32,11 @@ public class PlayerController : MonoBehaviour
     Animator animator;
     PhotonView photonView;
     [SerializeField] Slider m_hpBar;
+    [SerializeField] Button m_respawn;
+    [SerializeField] Button m_backToTitle;
+    //死んだときに呼んで
+    //m_respawn.gameObject.SetActive(true);
+    //m_backToTitle.gameObject.SetActive(true);
 
     private void Start()
     {
