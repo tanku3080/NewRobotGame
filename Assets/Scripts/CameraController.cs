@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Photon.Pun;
 using UnityEngine;
 
 public class CameraController : MonoBehaviour
@@ -7,6 +8,7 @@ public class CameraController : MonoBehaviour
     [SerializeField] Transform character, pivot;
     [Range(-0.999f, -0.5f)] public float maxAngle = -0.5f;
     [Range(0.5f, 0.999f)] public float minAngle = 0.5f;
+    PhotonView m_view;
     void Start()
     {
         if (character == null) character = transform.parent;
@@ -16,6 +18,7 @@ public class CameraController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (!m_view.IsMine) return;
         float X_Rotation = Input.GetAxis("Mouse X");
         float Y_Rotation = Input.GetAxis("Mouse Y");
         character.Rotate(0, X_Rotation, 0);
