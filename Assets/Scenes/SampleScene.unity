@@ -377,7 +377,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
---- !u!1001 &2048794349
+--- !u!1001 &2350936775516476599
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -390,7 +390,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2352697748478237640, guid: 3ded3dad1c0a74a4eb55193345cc5273, type: 3}
       propertyPath: m_Name
-      value: MediumMechStrikerMasterPrefab 1
+      value: MediumMechStrikerMasterPrefab
       objectReference: {fileID: 0}
     - target: {fileID: 2355514549702001904, guid: 3ded3dad1c0a74a4eb55193345cc5273, type: 3}
       propertyPath: m_LocalPosition.x
@@ -398,7 +398,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2355514549702001904, guid: 3ded3dad1c0a74a4eb55193345cc5273, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 0.0000009536743
       objectReference: {fileID: 0}
     - target: {fileID: 2355514549702001904, guid: 3ded3dad1c0a74a4eb55193345cc5273, type: 3}
       propertyPath: m_LocalPosition.z
@@ -406,15 +406,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2355514549702001904, guid: 3ded3dad1c0a74a4eb55193345cc5273, type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2355514549702001904, guid: 3ded3dad1c0a74a4eb55193345cc5273, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2355514549702001904, guid: 3ded3dad1c0a74a4eb55193345cc5273, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2355514549702001904, guid: 3ded3dad1c0a74a4eb55193345cc5273, type: 3}
       propertyPath: m_LocalRotation.w
