@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PointManager : MonoBehaviour
 {
@@ -10,6 +11,8 @@ public class PointManager : MonoBehaviour
     public int enemyPoint;
     [Tooltip("獲得ポイントの上限")]
     public int limitPoint;
+    public GameObject score_object = null;
+    public int score_num = 0;
     PlayerController player;
     void Start()
     {
@@ -20,11 +23,12 @@ public class PointManager : MonoBehaviour
     void Update()
     {
         //もし、どちらかの得点がlimitPointと同じかそれ以下ならPointMGを呼びだす
-        int limitPoint = 1;
         if (limitPoint <= SidePoint || limitPoint <= enemyPoint) 
         {
             PointMG();
         }
+        Text score_text = score_object.GetComponent<Text>();
+        score_text.text = "Score : " + score_num;
     }
     /// <summary>ポイントを加算する処理を書く</summary>
     void PointMG()
