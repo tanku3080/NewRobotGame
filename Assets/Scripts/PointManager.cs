@@ -10,14 +10,17 @@ public class PointManager : MonoBehaviour
     public int enemyPoint;
     [Tooltip("獲得ポイントの上限")]
     public int limitPoint;
+    PlayerController player;
     void Start()
     {
         //ここにplayerControllerから参照した得点を取得する
+        player = GetComponent<PlayerController>();
     }
 
     void Update()
     {
         //もし、どちらかの得点がlimitPointと同じかそれ以下ならPointMGを呼びだす
+        int limitPoint = 1;
         if (limitPoint <= SidePoint || limitPoint <= enemyPoint) 
         {
             PointMG();
@@ -28,5 +31,6 @@ public class PointManager : MonoBehaviour
     {
         //ここの処理を書くならプレイヤーコントローラーを参照する。
         //仮にプレイヤーコントローラーに書かれてなかったらテキトウな値をポイントとして加算するようにする
+        
     }
 }
