@@ -18,6 +18,7 @@ public class PlayerController : MonoBehaviour
     AnimeList list1;
     WeponList list2;
     int myLife = 20;
+    public int point;
     public int maxLife = 20;
     public float Speed = 2f,jump = 5f;
     [Tooltip("マズル")]
