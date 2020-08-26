@@ -36,15 +36,7 @@ public class JumpController : MonoBehaviour
         // Animator Controller のパラメータをセットする
         if (m_anim)
         {
-            // 攻撃ボタンを押された時の処理
-            if (Input.GetButtonDown("Fire1") && IsGrounded())
-            {
-                m_anim.SetTrigger("Attack");
-                /* -----------
-                 * TODO: アニメーションイベントを使って攻撃モーションが始まる時に動きを止め、
-                 * 攻撃モーションが終わったら動けるように処理を追加する
-                 * ----------- */
-            }
+
 
             // 水平方向の速度を Speed にセットする
             Vector3 velocity = m_rb.velocity;
