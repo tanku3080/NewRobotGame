@@ -9,13 +9,6 @@ public class CameraController : MonoBehaviour
     [Range(-0.999f, -0.5f)] public float maxAngle = -0.5f;
     [Range(0.5f, 0.999f)] public float minAngle = 0.5f;
     PhotonView m_view;
-    void Start()
-    {
-        if (character == null) character = transform.parent;
-        if (pivot == null) pivot = transform;
-    }
-
-    // Update is called once per frame
     void Update()
     {
         if (!m_view.IsMine) return;
