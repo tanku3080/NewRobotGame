@@ -18,7 +18,7 @@ public class CameraController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!m_view.IsMine) return;
+        //if (!m_view.IsMine) return;
         float X_Rotation = Input.GetAxis("Mouse X");
         float Y_Rotation = Input.GetAxis("Mouse Y");
         character.Rotate(0, X_Rotation, 0);
