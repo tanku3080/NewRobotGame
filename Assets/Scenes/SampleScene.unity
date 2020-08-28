@@ -388,6 +388,14 @@ PrefabInstance:
       propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2350936775404747203, guid: 3ded3dad1c0a74a4eb55193345cc5273, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.4
+      objectReference: {fileID: 0}
+    - target: {fileID: 2350936775404747203, guid: 3ded3dad1c0a74a4eb55193345cc5273, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -33.3
+      objectReference: {fileID: 0}
     - target: {fileID: 2352697748478237640, guid: 3ded3dad1c0a74a4eb55193345cc5273, type: 3}
       propertyPath: m_Name
       value: MediumMechStrikerMasterPrefab
