@@ -14,7 +14,7 @@ public class PlayerController : MonoBehaviour
     }
     private readonly AnimeList list1;
     private readonly WeponList list2;
-    int myLife = 200;
+    int myLife;
     public int point;
     public int maxLife = 200;
     public float Speed = 8f,jump = 5f,jumpPower = 5f;
@@ -54,6 +54,7 @@ public class PlayerController : MonoBehaviour
         photonView = GetComponent<PhotonView>();
 
         m_hpBar.maxValue = maxLife;
+        myLife = maxLife;
     }
 
     void Update()
