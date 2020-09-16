@@ -17,19 +17,27 @@ public class PlayerController : MonoBehaviour
     }
     AnimeList list1;
     WeponList list2;
-    int myLife = 20;
+    float myLife = 200;
     public int point;
-    public int maxLife = 20;
+    public int maxLife = 200;
     public float Speed = 8f,jump = 5f,jumpPower = 5f;
-    [Tooltip("マズル")]
-    public Transform _muzzleGun;
+    [Tooltip("マシンガンのマズル")]
+    public Transform MGmuzzle;
+    [Tooltip("ミサイルランチャーのマズル")]
+    public Transform MRmuzzle;
+    [Tooltip("レーザーのマズル")]
+    public Transform Pulsemuzzle;
+    public float _damage;
     public int RayDistance = 100;
     [Tooltip("体力の同期間隔")]
     public float lifeInterval = 1f;
     //接地判定の際、中心(Pivot)からどれくらいの距離を「接地している」と判定するかの長さ
     [SerializeField] float m_isGroundedLength = 1.1f;
     float timer;
-    RaycastHit hit;
+    bool panch = false;
+    //マウス操作の項目
+    int keep;
+    float mouse;
     Ray ray;
     Rigidbody rd;
     Animator animator;
@@ -44,41 +52,57 @@ public class PlayerController : MonoBehaviour
     private void Start()
     {
         rd = GetComponent<Rigidbody>();
-        animator = GetComponent<Animator>();
         photonView = GetComponent<PhotonView>();
 
         m_hpBar.maxValue = maxLife;
     }
+
     void Update()
     {
+        //if (!photonView.IsMine) return;
         // 方向の入力を取得し、方向を求める
         float v = Input.GetAxisRaw("Vertical");
         float h = Input.GetAxisRaw("Horizontal");
+        Move();
+        transform.Rotate(0, h * Speed, 0);
+
+        mouse = Input.GetAxis("Mouse ScrollWheel") * 10;
+        MouseCon();
+
         timer += Time.deltaTime;
 
         if (timer > lifeInterval)
         {
-            myLife = maxLife;
             //hp処理を書く
             m_hpBar.value = myLife;
         }
-        float mouse = Input.GetAxis("Mouse ScrollWheel");
-        int keep = (int)list2;
 
-        if (mouse >= (int)WeponList.NULL) mouse = 0;
-
-        if (mouse > 0)
+        if (Input.GetButtonDown("Fire1"))
         {
-            keep++;
-            Debug.Log("マウス前進");
-        }
-        if (mouse < 0)
-        {
-            keep--;
-            Debug.Log("マウス後退");
-        }
-        transform.Rotate(0, h * Speed, 0);
 
+        }
+        else if(Input.GetButtonDown("Fire1") && IsGrounded())//格闘
+        {
+            animator.SetTrigger("panch");
+            panch = true;
+
+        }
+
+        // ジャンプの入力を取得し、接地している時に押されていたらジャンプする
+        if (Input.GetButtonDown("Jump") && IsGrounded())
+        {
+            rd.AddForce(Vector3.up * jumpPower, ForceMode.Impulse);
+
+            // Animator Controller のパラメータをセットする
+            if (animator)
+            {
+                animator.SetBool("IsGrounded", false);
+            }
+        }
+    }
+
+    void Move()
+    {
         if (Input.GetKey("w"))
         {
             animeSet(AnimeList.moveF);
@@ -97,41 +121,53 @@ public class PlayerController : MonoBehaviour
         {
             transform.position -= transform.right * Speed * Time.deltaTime;
         }
+    }
+    void MouseCon()
+    {
+        keep += (int)list2;
 
-        if (Input.GetKeyDown(KeyCode.Mouse0))
+        if (keep >= (int)WeponList.NULL) keep = 0;
+
+        if (mouse > 0)
         {
-            ray = new Ray(_muzzleGun.position, _muzzleGun.forward);
-
-            if (Physics.Raycast(ray, out hit, RayDistance))
-            {
-                if (hit.collider.tag != "Pbject")
-                {
-                    //Damage()
-                }
-            }
+            keep += (int)mouse;
+            Debug.Log("マウス前進" + keep);
         }
-
-        // ジャンプの入力を取得し、接地している時に押されていたらジャンプする
-        if (Input.GetButtonDown("Jump") && IsGrounded())
+        if (mouse < 0)
         {
-            rd.AddForce(Vector3.up * jumpPower, ForceMode.Impulse);
+            keep -= (int)mouse;
+            Debug.Log("マウス後退" + keep);
+        }
+    }
 
-            // Animator Controller のパラメータをセットする
-            if (animator)
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (photonView.IsMine)
+        {
+            if (collision.gameObject.GetComponent<PlayerController>())
             {
-                animator.SetBool("IsGrounded", false);
+                Damage(PhotonNetwork.LocalPlayer.ActorNumber,_damage);
             }
         }
     }
 
-    //void Damage(int playerID,int damage)
-    //{
-    //    myLife -= damage;
-    //    //hpの関数を作って呼び出す
-    //    object[] parameter = new object[] { myLife };
-    //}
+    void Damage(int playerId,float damage)
+    {
+        myLife -= damage;
+        HpRefresh();
+        if(panch == true)
+        {
 
+        }
+    }
 
+    void HpRefresh()
+    {
+        if (m_hpBar)
+        {
+            m_hpBar.value -= _damage;
+        }
+    }
 
     //地面に衝突しているか判定する
     bool IsGrounded()
@@ -169,13 +205,20 @@ public class PlayerController : MonoBehaviour
         wepon = list2;
         switch (wepon)
         {
-            case WeponList._MG:
+            case WeponList._MG://マシンガン
+                ray = new Ray(MGmuzzle.position, MGmuzzle.forward);
+                _damage = 10f;
                 break;
-            case WeponList._MR:
+            case WeponList._MR://ミサイルランチャー
+                ray = new Ray(MRmuzzle.position, MRmuzzle.forward);
+                _damage = 50f;
                 break;
-            case WeponList._Beat:
+            case WeponList._Beat://格闘
+                _damage = 80f;
                 break;
-            case WeponList._Pulse:
+            case WeponList._Pulse://レーザー
+                ray = new Ray(Pulsemuzzle.position,Pulsemuzzle.forward);
+                _damage = 15f;
                 break;
         }
     }
