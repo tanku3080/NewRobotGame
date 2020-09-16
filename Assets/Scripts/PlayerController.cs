@@ -1,9 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using Photon.Pun;
 using UnityEngine;
 using UnityEngine.UI;
-using Photon.Pun;
-using Photon.Realtime;
 
 public class PlayerController : MonoBehaviour
 {
@@ -11,13 +8,13 @@ public class PlayerController : MonoBehaviour
     {
         _wait,moveF,moveB,jump,die
     }
-    enum WeponList:int
+    enum WeponList:int//マシンガン、ミサイル、パンチ、レーザー
     {
         _MG,_MR,_Beat,_Pulse,NULL
     }
-    AnimeList list1;
-    WeponList list2;
-    float myLife = 200;
+    private readonly AnimeList list1;
+    private readonly WeponList list2;
+    int myLife = 200;
     public int point;
     public int maxLife = 200;
     public float Speed = 8f,jump = 5f,jumpPower = 5f;
@@ -27,7 +24,7 @@ public class PlayerController : MonoBehaviour
     public Transform MRmuzzle;
     [Tooltip("レーザーのマズル")]
     public Transform Pulsemuzzle;
-    public float _damage;
+    public int _damage;
     public int RayDistance = 100;
     [Tooltip("体力の同期間隔")]
     public float lifeInterval = 1f;
@@ -35,6 +32,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float m_isGroundedLength = 1.1f;
     float timer;
     bool panch = false;
+    //移動関係の定数
+    float v, h;
     //マウス操作の項目
     int keep;
     float mouse;
@@ -61,13 +60,14 @@ public class PlayerController : MonoBehaviour
     {
         //if (!photonView.IsMine) return;
         // 方向の入力を取得し、方向を求める
-        float v = Input.GetAxisRaw("Vertical");
-        float h = Input.GetAxisRaw("Horizontal");
+        v = Input.GetAxisRaw("Vertical");
+        h = Input.GetAxisRaw("Horizontal");
         Move();
         transform.Rotate(0, h * Speed, 0);
 
         mouse = Input.GetAxis("Mouse ScrollWheel") * 10;
-        MouseCon();
+        weponSet(Mouse());
+        //MouseCon();
 
         timer += Time.deltaTime;
 
@@ -77,9 +77,9 @@ public class PlayerController : MonoBehaviour
             m_hpBar.value = myLife;
         }
 
-        if (Input.GetButtonDown("Fire1"))
+        if (Input.GetButtonDown("Fire1"))//格闘以外の攻撃
         {
-
+            //アニメーターのパラメーターを設定する
         }
         else if(Input.GetButtonDown("Fire1") && IsGrounded())//格闘
         {
@@ -103,62 +103,69 @@ public class PlayerController : MonoBehaviour
 
     void Move()
     {
-        if (Input.GetKey("w"))
+        if (v > 0)
         {
             animeSet(AnimeList.moveF);
             transform.position += transform.forward * Speed * Time.deltaTime;
         }
-        if (Input.GetKey("s"))
+        else if (v < 0)
         {
             animeSet(AnimeList.moveB);
             transform.position -= transform.forward * Speed * Time.deltaTime;
         }
-        if (Input.GetKey("d"))
+        if (h > 0)
         {
             transform.position += transform.right * Speed * Time.deltaTime;
         }
-        if (Input.GetKey("a"))
+        else if (h < 0)
         {
             transform.position -= transform.right * Speed * Time.deltaTime;
         }
     }
-    void MouseCon()
+    int Mouse()
     {
         keep += (int)list2;
-
         if (keep >= (int)WeponList.NULL) keep = 0;
-
         if (mouse > 0)
         {
             keep += (int)mouse;
-            Debug.Log("マウス前進" + keep);
         }
         if (mouse < 0)
         {
             keep -= (int)mouse;
-            Debug.Log("マウス後退" + keep);
         }
+        return keep;
     }
 
-    private void OnCollisionEnter(Collision collision)
+    ///// <summary>
+    ///// この処理はネットワークに繋げたら検証する
+    ///// </summary>
+    ///// <param name="collision"></param>
+    //private void OnCollisionEnter(Collision collision)
+    //{
+    //    if (photonView.IsMine)
+    //    {
+    //        if (collision.gameObject.GetComponent<PlayerController>())
+    //        {
+    //            Damage(PhotonNetwork.LocalPlayer.ActorNumber,_damage);
+    //        }
+    //    }
+    //}
+    private void OnTriggerEnter(Collider other)
     {
-        if (photonView.IsMine)
+        //パンチを受けた場合
+        if (other.gameObject.tag == "Enemy" && panch == true)
         {
-            if (collision.gameObject.GetComponent<PlayerController>())
-            {
-                Damage(PhotonNetwork.LocalPlayer.ActorNumber,_damage);
-            }
+            PlayerController enemy = GetComponent<PlayerController>();
+            enemy.Damage(PhotonNetwork.LocalPlayer.ActorNumber,_damage);
+            panch = false;
         }
     }
 
-    void Damage(int playerId,float damage)
+    void Damage(int playerId,int damage)
     {
         myLife -= damage;
         HpRefresh();
-        if(panch == true)
-        {
-
-        }
     }
 
     void HpRefresh()
@@ -200,25 +207,26 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    void weponSet(WeponList wepon)
+    void weponSet(int _keep)
     {
-        wepon = list2;
+        WeponList wepon;
+        wepon = (WeponList)_keep;
         switch (wepon)
         {
             case WeponList._MG://マシンガン
-                ray = new Ray(MGmuzzle.position, MGmuzzle.forward);
-                _damage = 10f;
+                //ray = new Ray(MGmuzzle.position, MGmuzzle.forward);
+                _damage = 10;
                 break;
             case WeponList._MR://ミサイルランチャー
-                ray = new Ray(MRmuzzle.position, MRmuzzle.forward);
-                _damage = 50f;
+               //ray = new Ray(MRmuzzle.position, MRmuzzle.forward);
+                _damage = 50;
                 break;
             case WeponList._Beat://格闘
-                _damage = 80f;
+                _damage = 80;
                 break;
             case WeponList._Pulse://レーザー
-                ray = new Ray(Pulsemuzzle.position,Pulsemuzzle.forward);
-                _damage = 15f;
+                //ray = new Ray(Pulsemuzzle.position,Pulsemuzzle.forward);
+                _damage = 15;
                 break;
         }
     }
