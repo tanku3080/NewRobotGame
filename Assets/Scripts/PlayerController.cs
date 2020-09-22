@@ -74,7 +74,7 @@ public class PlayerController : MonoBehaviour
         v = Input.GetAxisRaw("Vertical");
         h = Input.GetAxisRaw("Horizontal");
         Move();
-        transform.Rotate(0, h * Speed, 0);
+        //transform.Rotate(0, h * Speed, 0);
 
         mouse = Input.GetAxis("Mouse ScrollWheel") * 10;
         weponSet(Mouse());
