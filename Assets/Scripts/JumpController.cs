@@ -36,8 +36,6 @@ public class JumpController : MonoBehaviour
         // Animator Controller のパラメータをセットする
         if (m_anim)
         {
-
-
             // 水平方向の速度を Speed にセットする
             Vector3 velocity = m_rb.velocity;
             velocity.y = 0f;
