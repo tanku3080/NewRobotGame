@@ -179,7 +179,7 @@ public class PlayerController : MonoBehaviour
     //        }
     //    }
     //}
-    private void OnTriggerEnter(Collider other)
+    private void OnTriggerExit(Collider other)
     {
         //パンチを受けた場合
         if (other.gameObject.tag == "Enemy" && panch == true)
