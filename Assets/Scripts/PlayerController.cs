@@ -16,7 +16,6 @@ public class PlayerController : MonoBehaviour
     private readonly AnimeList list1;
     private readonly WeponList list2;
     int myLife;
-    public int point;
     public int maxLife = 200;
     public float Speed = 1f,jump = 5f,jumpPower = 5f;
     [Tooltip("マシンガンのマズル")]
@@ -47,9 +46,11 @@ public class PlayerController : MonoBehaviour
     int keep;
     int count = 0;
     float mouse;
+    Vector3 playerPos;
     Ray ray;
     Rigidbody rd;
     Animator animator;
+    public Transform cameraRoot;
     PhotonView photonView;
     [SerializeField] Slider m_hpBar;
     [SerializeField] Button m_respawn;
@@ -62,6 +63,7 @@ public class PlayerController : MonoBehaviour
     {
         rd = GetComponent<Rigidbody>();
         photonView = GetComponent<PhotonView>();
+        playerPos = transform.InverseTransformPoint(Camera.main.transform.localPosition);
 
         m_hpBar.maxValue = maxLife;
         myLife = maxLife;
@@ -71,9 +73,14 @@ public class PlayerController : MonoBehaviour
     {
         //if (!photonView.IsMine) return;
         // 方向の入力を取得し、方向を求める
+        Vector3 cameraF = Vector3.Scale(cameraRoot.forward,new Vector3(1,0,1).normalized);
+        Vector3 _moveDir = (cameraF * v + cameraRoot.right * h).normalized;
         v = Input.GetAxisRaw("Vertical");
         h = Input.GetAxisRaw("Horizontal");
-        Move();
+        if (h != 0 || v != 0 || h != 0 && v != 0)
+        {
+            Move(_moveDir);
+        }
         //transform.Rotate(0, h * Speed, 0);
 
         mouse = Input.GetAxis("Mouse ScrollWheel") * 10;
@@ -129,31 +136,14 @@ public class PlayerController : MonoBehaviour
         yield return new WaitForSeconds(gunFireInterval);
     }
 
-    void Move()
+    void Move(Vector3 moveDir)
     {
-        if (h != 0 || v != 0 || h != 0 && v != 0)
-        {
-            if (v > 0)
-            {
-                animeSet(AnimeList.moveF);
-                rd.velocity += Vector3.forward * Speed;
-            }
-            else if (v < 0)
-            {
-                animeSet(AnimeList.moveB);
-                rd.velocity -= Vector3.back * Speed;
-            }
-            if (h > 0)
-            {
-                rd.velocity += Vector3.right * Speed;
-            }
-            else if (h < 0)
-            {
-                rd.velocity -= Vector3.left * Speed;
-            }
-        }
-        else rd.velocity = Vector3.zero;
+        Vector3 velo = moveDir * Speed;
+
+        velo.y = rd.velocity.y;
+        rd.velocity = velo;
     }
+
     int Mouse()
     {
         keep += (int)list2;
@@ -161,10 +151,12 @@ public class PlayerController : MonoBehaviour
         if (mouse > 0)
         {
             keep += (int)mouse;
+            Debug.Log("マウス前進" + keep);
         }
         if (mouse < 0)
         {
             keep -= (int)mouse;
+            Debug.Log("マウス後進" + keep);
         }
         return keep;
     }
