@@ -16,10 +16,9 @@ public class PlayerController : MonoBehaviour
     private readonly AnimeList list1;
     private readonly WeponList list2;
     int myLife;
-    int unit;//使わ無い
     public int point;
     public int maxLife = 200;
-    public float Speed = 8f,jump = 5f,jumpPower = 5f;
+    public float Speed = 1f,jump = 5f,jumpPower = 5f;
     [Tooltip("マシンガンのマズル")]
     public Transform MGmuzzle;
     [Tooltip("射撃インターバル")]
@@ -107,7 +106,7 @@ public class PlayerController : MonoBehaviour
         // ジャンプの入力を取得し、接地している時に押されていたらジャンプする
         if (Input.GetButtonDown("Jump") && IsGrounded())
         {
-            rd.AddForce(Vector3.up * jumpPower, ForceMode.Impulse);
+            rd.AddForce(Vector3.up * jumpPower, ForceMode.VelocityChange);
 
             // Animator Controller のパラメータをセットする
             if (animator)
@@ -132,24 +131,28 @@ public class PlayerController : MonoBehaviour
 
     void Move()
     {
-        if (v > 0)
+        if (h != 0 || v != 0 || h != 0 && v != 0)
         {
-            animeSet(AnimeList.moveF);
-            transform.position += transform.forward * Speed * Time.deltaTime;
+            if (v > 0)
+            {
+                animeSet(AnimeList.moveF);
+                rd.velocity += Vector3.forward * Speed;
+            }
+            else if (v < 0)
+            {
+                animeSet(AnimeList.moveB);
+                rd.velocity -= Vector3.back * Speed;
+            }
+            if (h > 0)
+            {
+                rd.velocity += Vector3.right * Speed;
+            }
+            else if (h < 0)
+            {
+                rd.velocity -= Vector3.left * Speed;
+            }
         }
-        else if (v < 0)
-        {
-            animeSet(AnimeList.moveB);
-            transform.position -= transform.forward * Speed * Time.deltaTime;
-        }
-        if (h > 0)
-        {
-            transform.position += transform.right * Speed * Time.deltaTime;
-        }
-        else if (h < 0)
-        {
-            transform.position -= transform.right * Speed * Time.deltaTime;
-        }
+        else rd.velocity = Vector3.zero;
     }
     int Mouse()
     {
