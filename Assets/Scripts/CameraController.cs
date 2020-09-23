@@ -6,6 +6,10 @@ using UnityEngine;
 public class CameraController : MonoBehaviour
 {
     [SerializeField] Transform character, pivot;
+    public float distanceTaget = 5.0f;
+    public float heightTaget = 5.0f;
+    Vector3 lookAtOffset = new Vector3(0.0f,2.0f,0.0f);
+    [Range(1,10)]public int sensitivityX, sensitivityY;
     [Range(-0.999f, -0.5f)] public float maxAngle = -0.5f;
     [Range(0.5f, 0.999f)] public float minAngle = 0.5f;
     PhotonView m_view;
@@ -19,7 +23,7 @@ public class CameraController : MonoBehaviour
     void Update()
     {
         //if (!m_view.IsMine) return;
-        float X_Rotation = Input.GetAxis("Mouse X");
+        float X_Rotation = Input.GetAxis("Mouse X") * sensitivityX;
         float Y_Rotation = Input.GetAxis("Mouse Y");
         character.Rotate(0, X_Rotation, 0);
 

@@ -1,4 +1,5 @@
 ﻿using Photon.Pun;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -15,11 +16,20 @@ public class PlayerController : MonoBehaviour
     private readonly AnimeList list1;
     private readonly WeponList list2;
     int myLife;
+    int unit;//使わ無い
     public int point;
     public int maxLife = 200;
     public float Speed = 8f,jump = 5f,jumpPower = 5f;
     [Tooltip("マシンガンのマズル")]
     public Transform MGmuzzle;
+    [Tooltip("射撃インターバル")]
+    float gunFireInterval;
+    [Tooltip("リロードインターバル")]
+    float reLoadInterval;
+    [Tooltip("弾数")]
+    int bullet;
+    [Tooltip("装填弾数")]
+    int limitBullet;
     [Tooltip("ミサイルランチャーのマズル")]
     public Transform MRmuzzle;
     [Tooltip("レーザーのマズル")]
@@ -36,6 +46,7 @@ public class PlayerController : MonoBehaviour
     float v, h;
     //マウス操作の項目
     int keep;
+    int count = 0;
     float mouse;
     Ray ray;
     Rigidbody rd;
@@ -64,7 +75,7 @@ public class PlayerController : MonoBehaviour
         v = Input.GetAxisRaw("Vertical");
         h = Input.GetAxisRaw("Horizontal");
         Move();
-        transform.Rotate(0, h * Speed, 0);
+        //transform.Rotate(0, h * Speed, 0);
 
         mouse = Input.GetAxis("Mouse ScrollWheel") * 10;
         weponSet(Mouse());
@@ -80,6 +91,10 @@ public class PlayerController : MonoBehaviour
 
         if (Input.GetButtonDown("Fire1"))//格闘以外の攻撃
         {
+            for (int i = 0; i < limitBullet; i++)//個々の処理がおかしいので変更するようにする
+            {
+                StartCoroutine(FireCon());
+            }
             //アニメーターのパラメーターを設定する
         }
         else if(Input.GetButtonDown("Fire1") && IsGrounded())//格闘
@@ -100,6 +115,19 @@ public class PlayerController : MonoBehaviour
                 animator.SetBool("IsGrounded", false);
             }
         }
+    }
+    IEnumerator FireCon()
+    {
+        if (count <= 10)
+        {
+            yield return new WaitForSeconds(reLoadInterval);
+            Debug.Log("リロード");
+            count = 0;
+        }
+        Debug.Log("攻撃");
+        //以下に攻撃処理を書く
+
+        yield return new WaitForSeconds(gunFireInterval);
     }
 
     void Move()
@@ -152,7 +180,7 @@ public class PlayerController : MonoBehaviour
     //        }
     //    }
     //}
-    private void OnTriggerEnter(Collider other)
+    private void OnTriggerExit(Collider other)
     {
         //パンチを受けた場合
         if (other.gameObject.tag == "Enemy" && panch == true)
@@ -217,10 +245,18 @@ public class PlayerController : MonoBehaviour
             case WeponList._MG://マシンガン
                 //ray = new Ray(MGmuzzle.position, MGmuzzle.forward);
                 _damage = 10;
+                gunFireInterval = 0.5f;
+                reLoadInterval = 1.8f;
+                limitBullet = 30;
+                bullet = 100000;
                 break;
             case WeponList._MR://ミサイルランチャー
                //ray = new Ray(MRmuzzle.position, MRmuzzle.forward);
                 _damage = 50;
+                gunFireInterval = 1.5f;
+                reLoadInterval = 6f;
+                bullet = 30;
+                limitBullet = 10;
                 break;
             case WeponList._Beat://格闘
                 _damage = 80;
@@ -228,6 +264,10 @@ public class PlayerController : MonoBehaviour
             case WeponList._Pulse://レーザー
                 //ray = new Ray(Pulsemuzzle.position,Pulsemuzzle.forward);
                 _damage = 15;
+                gunFireInterval = 1f;
+                reLoadInterval = 4f;
+                bullet = 150;
+                limitBullet = 30;
                 break;
         }
     }
