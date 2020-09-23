@@ -16,6 +16,7 @@ public class PlayerController : MonoBehaviour
     private readonly AnimeList list1;
     private readonly WeponList list2;
     int myLife;
+    int unit;//使わ無い
     public int point;
     public int maxLife = 200;
     public float Speed = 8f,jump = 5f,jumpPower = 5f;
