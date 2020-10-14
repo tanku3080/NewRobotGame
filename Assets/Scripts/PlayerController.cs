@@ -161,17 +161,17 @@ public class PlayerController : MonoBehaviour
         return keep;
     }
 
-    ///// <summary>
-    ///// この処理はネットワークに繋げたら検証する
-    ///// </summary>
-    ///// <param name="collision"></param>
+    /// <summary>
+    /// この処理はネットワークに繋げたら検証する
+    /// </summary>
+    /// <param name="collision"></param>
     //private void OnCollisionEnter(Collision collision)
     //{
     //    if (photonView.IsMine)
     //    {
     //        if (collision.gameObject.GetComponent<PlayerController>())
     //        {
-    //            Damage(PhotonNetwork.LocalPlayer.ActorNumber,_damage);
+    //            Damage(PhotonNetwork.LocalPlayer.ActorNumber, _damage);
     //        }
     //    }
     //}
