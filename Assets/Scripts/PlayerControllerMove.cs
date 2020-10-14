@@ -13,7 +13,10 @@ using UnityEngine;
 public class PlayerControllerMove : MonoBehaviour
 
 {
-    
+    [SerializeField] Transform character, pivot;
+    [Range(-0.999f, -0.5f)] public float maxAngle = -0.5f;
+    [Range(0.5f, 0.999f)] public float minAngle = 0.5f;
+
 
     /// <summary>動く速さ</summary>
     [SerializeField] float m_moveSpeed = 8f;
@@ -31,27 +34,31 @@ public class PlayerControllerMove : MonoBehaviour
     PhotonView m_view;
     bool m_isHovering = false;
     Vector3 m_movingDirection = Vector3.zero;
-    [SerializeField] Transform character, pivot;
-    [Range(-0.999f, -0.5f)] public float maxAngle = -0.5f;
-    [Range(0.5f, 0.999f)] public float minAngle = 0.5f;
+
+
     void Start()
     {
-        if (character == null) character = transform.parent;
-        if (pivot == null) pivot = transform;
-    //    m_rb = GetComponent<Rigidbody>();
-    //    m_view = GetComponent<PhotonView>();
+        
+        {
+            if (character == null) character = transform.parent;
+            if (pivot == null) pivot = transform;
+        }
 
-    //    // カメラターゲットに自分を設定する
-    //    if (m_view.IsMine)
-    //    {
-    //        CinemachineVirtualCameraBase vcam = GameObject.FindObjectOfType<CinemachineVirtualCameraBase>();
-    //        vcam.Follow = transform;
-    //        vcam.LookAt = transform;
-    //    }
+        m_rb = GetComponent<Rigidbody>();
+        m_view = GetComponent<PhotonView>();
+
+        //    // カメラターゲットに自分を設定する
+        //    if (m_view.IsMine)
+        //    {
+        //        CinemachineVirtualCameraBase vcam = GameObject.FindObjectOfType<CinemachineVirtualCameraBase>();
+        //        vcam.Follow = transform;
+        //        vcam.LookAt = transform;
+        //    }
     }
 
     void FixedUpdate()
-    {
+        {
+        
         //物理挙動はこちらで処理する
 
         //m_rb.AddForce(m_movingDirection, ForceMode.Force);
@@ -63,8 +70,8 @@ public class PlayerControllerMove : MonoBehaviour
 
     }
 
-    void Update()
-    {
+        void Update()
+        {
 
         float X_Rotation = Input.GetAxis("Mouse X");
         float Y_Rotation = Input.GetAxis("Mouse Y");
@@ -84,10 +91,12 @@ public class PlayerControllerMove : MonoBehaviour
             if (nowAngle <= maxAngle) pivot.Rotate(-Y_Rotation, 0, 0);
         }
 
-        // 方向の入力を取得し、方向を求める
+
+        //方向の入力を取得し、方向を求める
         float v = Input.GetAxisRaw("Vertical");
         float h = Input.GetAxisRaw("Horizontal");
         transform.Rotate(0, h * m_turnSpeed, 0);
+        transform.position = transform.position + new Vector3(h * m_turnSpeed, 0, v * m_turnSpeed);
 
         if (Input.GetKey("w"))
         {
@@ -97,20 +106,23 @@ public class PlayerControllerMove : MonoBehaviour
         {
             transform.position -= transform.forward * m_moveSpeed * Time.deltaTime;
         }
-        if (Input.GetKey("d"))
-        {
-            // Y軸を中心に右旋回
-            transform.Rotate(new Vector3(0, 5, 0));
-            //円を描くように右旋回
-            //transform.position += transform.right * m_moveSpeed * Time.deltaTime;
-        }
-        if (Input.GetKey("a"))
-        {
-            // Y軸を中心に左旋回
-            transform.Rotate(new Vector3(0, -5, 0));
-            //円を描くように左旋回
-            //transform.position -= transform.right * m_moveSpeed * Time.deltaTime;
-        }
+
+
+
+        //if (Input.GetKey("d"))
+        //{
+        //    // Y軸を中心に右旋回
+        //    transform.Rotate(new Vector3(0, 5, 0));
+        //    //円を描くように右旋回
+        //    //transform.position += transform.right * m_moveSpeed * Time.deltaTime;
+        //}
+        //if (Input.GetKey("a"))
+        //{
+        //    // Y軸を中心に左旋回
+        //    transform.Rotate(new Vector3(0, -5, 0));
+        //    //円を描くように左旋回
+        //    //transform.position -= transform.right * m_moveSpeed * Time.deltaTime;
+        //}
 
 
 
@@ -205,4 +217,5 @@ public class PlayerControllerMove : MonoBehaviour
     //    return isGrounded;
     //}
 }
+
 
