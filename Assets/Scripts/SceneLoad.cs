@@ -1,31 +1,32 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class SceneLoad : MonoBehaviour
 {
-    enum SceneChenge
+    public enum SceneChenge
     {
         _Title,_Game,_Result,_Sumple
     }
-    SceneChenge _SneneChenge;
+    public SceneChenge _SneneChenge;
     string Scenename;
-    // Start is called before the first frame update
-    void Start()
+
+    private void Update()
     {
-        
+        if (Input.GetKeyDown(KeyCode.Return))
+        {
+            SceneLoader();
+        }
     }
 
-    void SceneLoader()
+    public void SceneLoader()
     {
-        SceneManager.LoadScene(SneneSet());
+        SneneSet();
+        SceneManager.LoadScene(Scenename);
     }
 
-    string SneneSet()
+    void SneneSet()
     {
-        SceneChenge chenge;
-        chenge = _SneneChenge;
+        SceneChenge chenge = _SneneChenge;
         switch (chenge)
         {
             case SceneChenge._Title:
@@ -41,6 +42,5 @@ public class SceneLoad : MonoBehaviour
                 Scenename = "SampleScene";
                 break;
         }
-        return SneneSet();
     }
 }
