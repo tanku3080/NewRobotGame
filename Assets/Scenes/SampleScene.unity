@@ -870,6 +870,14 @@ PrefabInstance:
       propertyPath: m_Constraints
       value: 80
       objectReference: {fileID: 0}
+    - target: {fileID: 8128746795777213438, guid: 3ded3dad1c0a74a4eb55193345cc5273, type: 3}
+      propertyPath: viewIdField
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8168266637732766553, guid: 3ded3dad1c0a74a4eb55193345cc5273, type: 3}
+      propertyPath: viewIdField
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8287645047430107964, guid: 3ded3dad1c0a74a4eb55193345cc5273, type: 3}
       propertyPath: m_RootOrder
       value: 4

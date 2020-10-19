@@ -7,17 +7,17 @@ public class PlayerController : MonoBehaviour
 {
     enum AnimeList
     {
-        _wait,moveF,moveB,jump,die
+        _wait, moveF, moveB, jump, die
     }
-    enum WeponList:int//マシンガン、ミサイル、パンチ、レーザー
+    enum WeponList : int//マシンガン、ミサイル、パンチ、レーザー
     {
-        _MG,_MR,_Beat,_Pulse,NULL
+        _MG, _MR, _Beat, _Pulse, NULL
     }
     private readonly AnimeList list1;
     private readonly WeponList list2;
     int myLife;
     public int maxLife = 200;
-    public float Speed = 1f,jump = 5f,jumpPower = 5f;
+    public float speed = 1f, jump = 5f, jumpPower = 5f;
     [Tooltip("マシンガンのマズル")]
     public Transform MGmuzzle;
     [Tooltip("射撃インターバル")]
@@ -49,7 +49,7 @@ public class PlayerController : MonoBehaviour
     Vector3 playerPos;
     Ray ray;
     Rigidbody rd;
-    Animator animator;
+    Animator anime;
     public Transform cameraRoot;
     PhotonView photonView;
     [SerializeField] Slider m_hpBar;
@@ -73,13 +73,14 @@ public class PlayerController : MonoBehaviour
     {
         //if (!photonView.IsMine) return;
         // 方向の入力を取得し、方向を求める
-        Vector3 cameraF = Vector3.Scale(cameraRoot.forward,new Vector3(1,0,1).normalized);
+        Vector3 cameraF = Vector3.Scale(cameraRoot.forward, new Vector3(1, 0, 1).normalized);
         Vector3 _moveDir = (cameraF * v + cameraRoot.right * h).normalized;
         v = Input.GetAxisRaw("Vertical");
         h = Input.GetAxisRaw("Horizontal");
         if (h != 0 || v != 0 || h != 0 && v != 0)
         {
-            Move(_moveDir);
+            Debug.Log("入った");
+            Move();
         }
         //transform.Rotate(0, h * Speed, 0);
 
@@ -103,9 +104,9 @@ public class PlayerController : MonoBehaviour
             }
             //アニメーターのパラメーターを設定する
         }
-        else if(Input.GetButtonDown("Fire1") && IsGrounded())//格闘
+        else if (Input.GetButtonDown("Fire1") && IsGrounded())//格闘
         {
-            animator.SetTrigger("panch");
+            anime.SetTrigger("panch");
             panch = true;
 
         }
@@ -116,9 +117,9 @@ public class PlayerController : MonoBehaviour
             rd.AddForce(Vector3.up * jumpPower, ForceMode.VelocityChange);
 
             // Animator Controller のパラメータをセットする
-            if (animator)
+            if (anime)
             {
-                animator.SetBool("IsGrounded", false);
+                anime.SetBool("IsGrounded", false);
             }
         }
     }
@@ -136,12 +137,39 @@ public class PlayerController : MonoBehaviour
         yield return new WaitForSeconds(gunFireInterval);
     }
 
-    void Move(Vector3 moveDir)
+    void Move()
     {
-        Vector3 velo = moveDir * Speed;
+        if (Input.GetKey(KeyCode.W))
+        {
+            transform.position += (transform.forward * speed).normalized;
+            anime.SetBool("WalkF", true);
+            anime.speed = speed;
+        }
+        else anime.SetBool("WalkF", false);
 
-        velo.y = rd.velocity.y;
-        rd.velocity = velo;
+        if (Input.GetKey(KeyCode.S))
+        {
+            transform.position -= (transform.forward * speed).normalized;
+            anime.SetBool("Back", true);
+            anime.speed = speed;
+        }
+        else anime.SetBool("Back", false);
+
+        if (Input.GetKey(KeyCode.A))
+        {
+            transform.position -= (transform.right * speed).normalized;
+            anime.SetBool("Left", true);
+            anime.speed = speed;
+        }
+        else anime.SetBool("Left", false);
+
+        if (Input.GetKey(KeyCode.D))
+        {
+            transform.position += (transform.right * speed).normalized;
+            anime.SetBool("Right", true);
+            anime.speed = speed;
+        }
+        else anime.SetBool("Right", false);
     }
 
     int Mouse()
@@ -181,12 +209,12 @@ public class PlayerController : MonoBehaviour
         if (other.gameObject.tag == "Enemy" && panch == true)
         {
             PlayerController enemy = GetComponent<PlayerController>();
-            enemy.Damage(PhotonNetwork.LocalPlayer.ActorNumber,_damage);
+            enemy.Damage(PhotonNetwork.LocalPlayer.ActorNumber, _damage);
             panch = false;
         }
     }
 
-    void Damage(int playerId,int damage)
+    void Damage(int playerId, int damage)
     {
         myLife -= damage;
         HpRefresh();
@@ -246,7 +274,7 @@ public class PlayerController : MonoBehaviour
                 bullet = 100000;
                 break;
             case WeponList._MR://ミサイルランチャー
-               //ray = new Ray(MRmuzzle.position, MRmuzzle.forward);
+                               //ray = new Ray(MRmuzzle.position, MRmuzzle.forward);
                 _damage = 50;
                 gunFireInterval = 1.5f;
                 reLoadInterval = 6f;
