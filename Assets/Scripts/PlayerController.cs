@@ -2,7 +2,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
-
+[RequireComponent(typeof(Rigidbody))]
 public class PlayerController : MonoBehaviour
 {
     enum AnimeList
@@ -17,7 +17,7 @@ public class PlayerController : MonoBehaviour
     private readonly WeponList list2;
     int myLife;
     public int maxLife = 200;
-    public float speed = 1f, jump = 5f, jumpPower = 5f;
+    public float speed = 10f, jump = 5f, jumpPower = 5f;
     [Tooltip("マシンガンのマズル")]
     public Transform MGmuzzle;
     [Tooltip("射撃インターバル")]
@@ -46,8 +46,8 @@ public class PlayerController : MonoBehaviour
     int keep;
     int count = 0;
     float mouse;
+    int mouseContKeep;
     Vector3 playerPos;
-    Ray ray;
     Rigidbody rd;
     Animator anime;
     public Transform cameraRoot;
@@ -55,6 +55,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField] Slider m_hpBar;
     [SerializeField] Button m_respawn;
     [SerializeField] Button m_backToTitle;
+
+    PlayerController enemy;
+    RaycastHit hit;
     //死んだときに呼んで
     //m_respawn.gameObject.SetActive(true);
     //m_backToTitle.gameObject.SetActive(true);
@@ -86,7 +89,6 @@ public class PlayerController : MonoBehaviour
 
         mouse = Input.GetAxis("Mouse ScrollWheel") * 10;
         weponSet(Mouse());
-        //MouseCon();
 
         timer += Time.deltaTime;
 
@@ -96,34 +98,35 @@ public class PlayerController : MonoBehaviour
             m_hpBar.value = myLife;
         }
 
-        if (Input.GetButtonDown("Fire1"))//格闘以外の攻撃
+        if (anime)
         {
-            for (int i = 0; i < limitBullet; i++)//個々の処理がおかしいので変更するようにする
+            if (Input.GetButtonDown("Fire1") && list2 != WeponList._MR && list2 != WeponList._Beat)//格闘とMissile以外の攻撃
             {
-                StartCoroutine(FireCon());
+                for (int i = 0; i < limitBullet; i++)//個々の処理がおかしいので変更するようにする
+                {
+                    Debug.Log("射撃開始" + i);
+                    StartCoroutine(FireCon(200));
+                }
+                //アニメーターのパラメーターを設定する
             }
-            //アニメーターのパラメーターを設定する
-        }
-        else if (Input.GetButtonDown("Fire1") && IsGrounded())//格闘
-        {
-            anime.SetTrigger("panch");
-            panch = true;
-
-        }
-
-        // ジャンプの入力を取得し、接地している時に押されていたらジャンプする
-        if (Input.GetButtonDown("Jump") && IsGrounded())
-        {
-            rd.AddForce(Vector3.up * jumpPower, ForceMode.VelocityChange);
-
-            // Animator Controller のパラメータをセットする
-            if (anime)
+            else if (Input.GetButtonDown("Fire1") && IsGrounded() && list2 == WeponList._Beat)//格闘
             {
+                anime.SetTrigger("panch");
+                panch = true;
+
+            }
+            //以下はジャンプ処理
+            Vector3 velo = rd.velocity;
+            velo.y = 0f;
+            // ジャンプの入力を取得し、接地している時に押されていたらジャンプする
+            if (Input.GetButtonDown("Jump") && IsGrounded())
+            {
+                rd.AddForce(Vector3.up * jumpPower, ForceMode.VelocityChange);
                 anime.SetBool("IsGrounded", false);
             }
         }
     }
-    IEnumerator FireCon()
+    IEnumerator FireCon(float range)
     {
         if (count <= 10)
         {
@@ -133,7 +136,10 @@ public class PlayerController : MonoBehaviour
         }
         Debug.Log("攻撃");
         //以下に攻撃処理を書く
-
+        Ray ray = new Ray(transform.position, transform.forward);
+        //射程は200固定
+        Physics.Raycast(ray, out hit, range);
+        Debug.DrawRay(transform.position, transform.forward);
         yield return new WaitForSeconds(gunFireInterval);
     }
 
@@ -141,23 +147,23 @@ public class PlayerController : MonoBehaviour
     {
         if (Input.GetKey(KeyCode.W))
         {
-            transform.position += (transform.forward * speed).normalized;
-            anime.SetBool("WalkF", true);
+            rd.velocity = Vector3.forward * speed;
+            anime.SetBool("moveF", true);
             anime.speed = speed;
         }
-        else anime.SetBool("WalkF", false);
+        else anime.SetBool("moveF", false);
 
         if (Input.GetKey(KeyCode.S))
         {
-            transform.position -= (transform.forward * speed).normalized;
-            anime.SetBool("Back", true);
+            rd.velocity = Vector3.back * speed;
+            anime.SetBool("moveB", true);
             anime.speed = speed;
         }
-        else anime.SetBool("Back", false);
+        else anime.SetBool("moveB", false);
 
         if (Input.GetKey(KeyCode.A))
         {
-            transform.position -= (transform.right * speed).normalized;
+            rd.velocity = Vector3.left * speed;
             anime.SetBool("Left", true);
             anime.speed = speed;
         }
@@ -165,7 +171,7 @@ public class PlayerController : MonoBehaviour
 
         if (Input.GetKey(KeyCode.D))
         {
-            transform.position += (transform.right * speed).normalized;
+            rd.velocity = Vector3.right * speed;
             anime.SetBool("Right", true);
             anime.speed = speed;
         }
@@ -189,20 +195,6 @@ public class PlayerController : MonoBehaviour
         return keep;
     }
 
-    /// <summary>
-    /// この処理はネットワークに繋げたら検証する
-    /// </summary>
-    /// <param name="collision"></param>
-    //private void OnCollisionEnter(Collision collision)
-    //{
-    //    if (photonView.IsMine)
-    //    {
-    //        if (collision.gameObject.GetComponent<PlayerController>())
-    //        {
-    //            Damage(PhotonNetwork.LocalPlayer.ActorNumber, _damage);
-    //        }
-    //    }
-    //}
     private void OnTriggerExit(Collider other)
     {
         //パンチを受けた場合
@@ -225,6 +217,19 @@ public class PlayerController : MonoBehaviour
         if (m_hpBar)
         {
             m_hpBar.value -= _damage;
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (photonView.IsMine)
+        {
+            enemy = collision.gameObject.GetComponent<PlayerController>();
+            if (hit.collider.gameObject == enemy)
+            {
+                Debug.Log("当たった");
+                Damage(PhotonNetwork.LocalPlayer.ActorNumber,_damage);
+            }
         }
     }
 
