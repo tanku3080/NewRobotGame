@@ -3159,7 +3159,7 @@ GameObject:
   - component: {fileID: 2397560693730507232}
   - component: {fileID: 2350936775441506045}
   m_Layer: 0
-  m_Name: MediumMechStrikerMasterPrefab 1
+  m_Name: Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
