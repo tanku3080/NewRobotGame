@@ -7,14 +7,19 @@ public class PlayerController : MonoBehaviour
 {
     enum AnimeList
     {
-        _wait, moveF, moveB, jump, die
+         _move, jump, die,_leftAndRight
+    }
+    enum MoveList
+    {
+        _moveWait,_moveF,_moveB,jump, _left,_right, die
     }
     enum WeponList : int//マシンガン、ミサイル、パンチ、レーザー
     {
         _MG, _MR, _Beat, _Pulse, NULL
     }
-    private readonly AnimeList list1;
-    private readonly WeponList list2;
+    private readonly AnimeList list_anime;
+    private readonly WeponList list_wepon;
+    private readonly MoveList list_move;
     int myLife;
     public int maxLife = 200;
     public float speed = 10f, jump = 5f, jumpPower = 5f;
@@ -47,11 +52,10 @@ public class PlayerController : MonoBehaviour
     int count = 0;
     float mouse;
     int mouseContKeep;
-    Vector3 playerPos;
     Rigidbody rd;
-    Animator anime;
-    public Transform cameraRoot;
+    Animator anime_play;
     PhotonView photonView;
+    //UI
     [SerializeField] Slider m_hpBar;
     [SerializeField] Button m_respawn;
     [SerializeField] Button m_backToTitle;
@@ -65,22 +69,25 @@ public class PlayerController : MonoBehaviour
     private void Start()
     {
         rd = GetComponent<Rigidbody>();
-        photonView = GetComponent<PhotonView>();
-        playerPos = transform.InverseTransformPoint(Camera.main.transform.localPosition);
+        anime_play = GetComponent<Animator>();
+        photonView = gameObject.GetComponent<PhotonView>();
 
         m_hpBar.maxValue = maxLife;
         myLife = maxLife;
     }
 
+    private void FixedUpdate()
+    {
+        rd.AddForce(Vector3.down, ForceMode.Impulse);
+        transform.rotation = Camera.main.transform.rotation;
+    }
+
     void Update()
     {
         //if (!photonView.IsMine) return;
-        // 方向の入力を取得し、方向を求める
-        Vector3 cameraF = Vector3.Scale(cameraRoot.forward, new Vector3(1, 0, 1).normalized);
-        Vector3 _moveDir = (cameraF * v + cameraRoot.right * h).normalized;
         v = Input.GetAxisRaw("Vertical");
         h = Input.GetAxisRaw("Horizontal");
-        if (h != 0 || v != 0 || h != 0 && v != 0)
+        if (h != 0 || v != 0)
         {
             Debug.Log("入った");
             Move();
@@ -98,9 +105,9 @@ public class PlayerController : MonoBehaviour
             m_hpBar.value = myLife;
         }
 
-        if (anime)
+        if (anime_play)
         {
-            if (Input.GetButtonDown("Fire1") && list2 != WeponList._MR && list2 != WeponList._Beat)//格闘とMissile以外の攻撃
+            if (Input.GetButtonDown("Fire1") && list_wepon != WeponList._MR && list_wepon != WeponList._Beat)//格闘とMissile以外の攻撃
             {
                 for (int i = 0; i < limitBullet; i++)//個々の処理がおかしいので変更するようにする
                 {
@@ -109,9 +116,9 @@ public class PlayerController : MonoBehaviour
                 }
                 //アニメーターのパラメーターを設定する
             }
-            else if (Input.GetButtonDown("Fire1") && IsGrounded() && list2 == WeponList._Beat)//格闘
+            else if (Input.GetButtonDown("Fire1") && IsGrounded() && list_wepon == WeponList._Beat)//格闘
             {
-                anime.SetTrigger("panch");
+                anime_play.SetTrigger("panch");
                 panch = true;
 
             }
@@ -121,8 +128,13 @@ public class PlayerController : MonoBehaviour
             // ジャンプの入力を取得し、接地している時に押されていたらジャンプする
             if (Input.GetButtonDown("Jump") && IsGrounded())
             {
-                rd.AddForce(Vector3.up * jumpPower, ForceMode.VelocityChange);
-                anime.SetBool("IsGrounded", false);
+                moveSet(MoveList.jump);
+                animeSet(AnimeList.jump,true);
+            }
+            else
+            {
+                animeSet(AnimeList.jump, false);
+                return;
             }
         }
     }
@@ -147,40 +159,35 @@ public class PlayerController : MonoBehaviour
     {
         if (Input.GetKey(KeyCode.W))
         {
-            rd.velocity = Vector3.forward * speed;
-            anime.SetBool("moveF", true);
-            anime.speed = speed;
+            moveSet(MoveList._moveF);
+            animeSet(AnimeList._move,true);
         }
-        else anime.SetBool("moveF", false);
 
         if (Input.GetKey(KeyCode.S))
         {
-            rd.velocity = Vector3.back * speed;
-            anime.SetBool("moveB", true);
-            anime.speed = speed;
+            moveSet(MoveList._moveB);
+            animeSet(AnimeList._move, false);
         }
-        else anime.SetBool("moveB", false);
 
         if (Input.GetKey(KeyCode.A))
         {
             rd.velocity = Vector3.left * speed;
-            anime.SetBool("Left", true);
-            anime.speed = speed;
+            animeSet(AnimeList._leftAndRight, true);
+            anime_play.speed = speed;
         }
-        else anime.SetBool("Left", false);
 
         if (Input.GetKey(KeyCode.D))
         {
             rd.velocity = Vector3.right * speed;
-            anime.SetBool("Right", true);
-            anime.speed = speed;
+            animeSet(AnimeList._leftAndRight, false);
+            anime_play.speed = speed;
         }
-        else anime.SetBool("Right", false);
+        anime_play.speed = speed;
     }
 
     int Mouse()
     {
-        keep += (int)list2;
+        keep += (int)list_wepon;
         if (keep >= (int)WeponList.NULL) keep = 0;
         if (mouse > 0)
         {
@@ -245,19 +252,48 @@ public class PlayerController : MonoBehaviour
         return isGrounded;
     }
 
-
-    void animeSet(AnimeList anime)
+    void moveSet(MoveList move)
     {
-        anime = list1;
+        move = list_move;
+        switch (move)
+        {
+            case MoveList._moveWait:
+                break;
+            case MoveList._moveF:
+                rd.velocity = Vector3.forward * speed;
+                break;
+            case MoveList._moveB:
+                rd.velocity = Vector3.back * speed;
+                break;
+            case MoveList.jump:
+                rd.AddForce(Vector3.up * jumpPower, ForceMode.Force);
+                break;
+            case MoveList._left:
+                rd.velocity = Vector3.left * speed;
+                break;
+            case MoveList._right:
+                rd.velocity = Vector3.right * speed;
+                break;
+            case MoveList.die:
+                break;
+            default:
+                break;
+        }
+    }
+
+    void animeSet(AnimeList anime, bool isActive = false)
+    {
+        anime = list_anime;
         switch (anime)
         {
-            case AnimeList._wait:
+            case AnimeList._move:
+                anime_play.SetBool(name = isActive ? "moveF" : "moveB",true);
                 break;
-            case AnimeList.moveF:
-                break;
-            case AnimeList.moveB:
+            case AnimeList._leftAndRight:
+                anime_play.SetBool(name = isActive ? "Left" : "Right", true);
                 break;
             case AnimeList.jump:
+                anime_play.SetBool("IsGrounded",isActive);
                 break;
             case AnimeList.die:
                 break;
