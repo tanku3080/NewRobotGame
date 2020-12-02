@@ -18,8 +18,8 @@ public class PlayerController : MonoBehaviour
         _MG, _MR, _Beat, _Pulse, NULL
     }
     private readonly AnimeList list_anime;
-    private readonly WeponList list_wepon;
-    private readonly MoveList list_move;
+    private readonly WeponList list_wepon = WeponList.NULL;
+    private readonly MoveList list_move = MoveList._moveWait;
     int myLife;
     public int maxLife = 200;
     public float speed = 10f, jump = 5f, jumpPower = 5f;
@@ -287,10 +287,10 @@ public class PlayerController : MonoBehaviour
         switch (anime)
         {
             case AnimeList._move:
-                anime_play.SetBool(name = isActive ? "moveF" : "moveB",true);
+                anime_play.SetBool(name = isActive ? "moveF" : "moveB", isActive ? false : true);
                 break;
             case AnimeList._leftAndRight:
-                anime_play.SetBool(name = isActive ? "Left" : "Right", true);
+                anime_play.SetBool(name = isActive ? "Left" : "Right", isActive ? false : true);
                 break;
             case AnimeList.jump:
                 anime_play.SetBool("IsGrounded",isActive);

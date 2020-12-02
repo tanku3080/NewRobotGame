@@ -1,22 +1,15 @@
 ﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class SceneLoad : MonoBehaviour
+public class SceneLoad : Singleton<SceneLoad>
 {
     public enum SceneChenge
     {
         _Title,_Game,_Result,_Sumple
     }
     public SceneChenge _SneneChenge;
-    string Scenename;
-
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Return))
-        {
-            SceneLoader();
-        }
-    }
+    private string Scenename;
+    public bool sceneChangeFlag = false;
 
     public void SceneLoader()
     {
@@ -31,15 +24,19 @@ public class SceneLoad : MonoBehaviour
         {
             case SceneChenge._Title:
                 Scenename = "Title";
+                sceneChangeFlag = true;
                 break;
             case SceneChenge._Game:
                 Scenename = "Game";
+                sceneChangeFlag = true;
                 break;
             case SceneChenge._Result:
                 Scenename = "Result";
+                sceneChangeFlag = true;
                 break;
             case SceneChenge._Sumple:
                 Scenename = "SampleScene";
+                //sceneChangeFlag = true;
                 break;
         }
     }
