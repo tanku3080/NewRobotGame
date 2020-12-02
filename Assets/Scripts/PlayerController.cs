@@ -85,8 +85,8 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         //if (!photonView.IsMine) return;
-        v = Input.GetAxisRaw("Vertical");
-        h = Input.GetAxisRaw("Horizontal");
+        v = Input.GetAxis("Vertical");
+        h = Input.GetAxis("Horizontal");
         if (h != 0 || v != 0)
         {
             Debug.Log("入った");
@@ -159,18 +159,21 @@ public class PlayerController : MonoBehaviour
     {
         if (Input.GetKey(KeyCode.W))
         {
+            Debug.Log("前進");
             moveSet(MoveList._moveF);
             animeSet(AnimeList._move,true);
         }
 
         if (Input.GetKey(KeyCode.S))
         {
+            Debug.Log("後進");
             moveSet(MoveList._moveB);
             animeSet(AnimeList._move, false);
         }
 
         if (Input.GetKey(KeyCode.A))
         {
+            Debug.Log("左");
             rd.velocity = Vector3.left * speed;
             animeSet(AnimeList._leftAndRight, true);
             anime_play.speed = speed;
@@ -178,6 +181,7 @@ public class PlayerController : MonoBehaviour
 
         if (Input.GetKey(KeyCode.D))
         {
+            Debug.Log("右");
             rd.velocity = Vector3.right * speed;
             animeSet(AnimeList._leftAndRight, false);
             anime_play.speed = speed;
@@ -258,21 +262,22 @@ public class PlayerController : MonoBehaviour
         switch (move)
         {
             case MoveList._moveWait:
+                rd.velocity = Vector3.zero;
                 break;
             case MoveList._moveF:
-                rd.velocity = Vector3.forward * speed;
+                rd.velocity += Vector3.forward * speed;
                 break;
             case MoveList._moveB:
-                rd.velocity = Vector3.back * speed;
+                rd.velocity += Vector3.back * speed;
                 break;
             case MoveList.jump:
                 rd.AddForce(Vector3.up * jumpPower, ForceMode.Force);
                 break;
             case MoveList._left:
-                rd.velocity = Vector3.left * speed;
+                rd.velocity += Vector3.left * speed;
                 break;
             case MoveList._right:
-                rd.velocity = Vector3.right * speed;
+                rd.velocity += Vector3.right * speed;
                 break;
             case MoveList.die:
                 break;
