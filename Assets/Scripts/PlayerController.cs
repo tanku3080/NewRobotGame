@@ -281,8 +281,6 @@ public class PlayerController : MonoBehaviour
                 break;
             case MoveList.die:
                 break;
-            default:
-                break;
         }
     }
 
